@@ -21,6 +21,8 @@
 <meta name="twitter:title" content="OperatorZero &#8212; Cybersecurity Threat Intelligence">
 <meta name="twitter:description" content="Live CVE vulnerabilities, global cyberattack map, malware alerts and CTF competitions.">
 <!-- SECURITY HEADERS via meta -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src * data:; connect-src https://api.rss2json.com https://ctftime.org https://nvd.nist.gov https://www.cisa.gov https://www.exploit-db.com https://feeds.feedburner.com https://www.bleepingcomputer.com https://krebsonsecurity.com https://feeds.feedburner.com https://blog.malwarebytes.com; frame-ancestors 'none'; object-src 'none'; base-uri 'self';">
+<meta http-equiv="X-Frame-Options" content="DENY">
 <meta http-equiv="X-XSS-Protection" content="1; mode=block">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
@@ -284,7 +286,7 @@ footer span{color:var(--green)}
 </footer>
 
 <!-- SCRIPTS -->
-<script src="https://unpkg.com/globe.gl@2.27.2/dist/globe.gl.min.js"></script>
+<script src="https://unpkg.com/globe.gl@2.27.2/dist/globe.gl.min.js" crossorigin="anonymous"></script>
 <script>
 // ─── MATRIX RAIN ───
 (function(){
@@ -426,6 +428,25 @@ threats.forEach(t=>{
 });
 
 // ─── NEWS FEED ───
+
+// ═══ SECURITY: XSS sanitizer ═══
+function sanitize(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#x27;')
+    .replace(/`/g,'&#x60;');
+}
+function safeUrl(url) {
+  if (!url) return '#';
+  const u = String(url).trim().toLowerCase();
+  if (u.startsWith('javascript:') || u.startsWith('data:') || u.startsWith('vbscript:')) return '#';
+  return url;
+}
+
 const RSS2JSON='https://api.rss2json.com/v1/api.json?rss_url=';
 const FEEDS=[
   {name:'The Hacker News',url:'https://feeds.feedburner.com/TheHackersNews',tag:'APT',tagClass:'apt'},
@@ -460,12 +481,12 @@ async function loadNews(){
   el.innerHTML=all.map(a=>`
     <div class="news-card ${a.color}">
       <div class="card-source">
-        <span>${a.source}</span>
-        <span class="tag ${a.tagClass}">${a.tag}</span>
+        <span>${sanitize(a.source)}</span>
+        <span class="tag ${a.tagClass}">${sanitize(a.tag)}</span>
       </div>
-      <div class="card-title">${a.title}</div>
-      <div class="card-desc">${a.desc}</div>
-      <a class="card-link" href="${a.link}" target="_blank" rel="noopener">[ READ MORE → ]</a>
+      <div class="card-title">${sanitize(a.title)}</div>
+      <div class="card-desc">${sanitize(a.desc)}</div>
+      <a class="card-link" href="${safeUrl(a.link)}" target="_blank" rel="noopener noreferrer">[ READ MORE → ]</a>
     </div>`).join('');
   termLog('ok',`Loaded ${all.length} threat intel items from RSS feeds`);
 }
@@ -478,7 +499,6 @@ async function loadCTF(){
   const url=`https://ctftime.org/api/v1/events/?limit=12&start=${now}`;
   try{
     const r=await fetch(url,{headers:{'Accept':'application/json'}});
-    const d=await r.json();
     const events=await r.json();
     const grid=document.getElementById('ctf-grid');
     if(!events||!events.length){grid.innerHTML='<div class="loading">[ NO CTF EVENTS AVAILABLE ]</div>';return;}
@@ -487,12 +507,12 @@ async function loadCTF(){
       const dur=Math.round((finish-start)/3600000);
       const fmt=d=>`${d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})} ${d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})} UTC`;
       return`<div class="ctf-card">
-        <div class="ctf-title">${e.title}</div>
-        <div class="ctf-date">START: <span>${fmt(start)}</span></div>
-        <div class="ctf-date">END: <span>${fmt(finish)}</span></div>
-        <div class="ctf-format">FORMAT: <span>${e.format||'N/A'}</span></div>
-        <div class="ctf-weight">WEIGHT: <span>${e.weight||0}</span> &nbsp; DURATION: <span>${dur}h</span></div>
-        <a class="ctf-link" href="https://ctftime.org/event/${e.id}" target="_blank" rel="noopener">[ VIEW EVENT → ]</a>
+        <div class="ctf-title">${sanitize(e.title)}</div>
+        <div class="ctf-date">START: <span>${sanitize(fmt(start))}</span></div>
+        <div class="ctf-date">END: <span>${sanitize(fmt(finish))}</span></div>
+        <div class="ctf-format">FORMAT: <span>${sanitize(e.format||'N/A')}</span></div>
+        <div class="ctf-weight">WEIGHT: <span>${sanitize(String(e.weight||0))}</span> &nbsp; DURATION: <span>${sanitize(String(dur))}h</span></div>
+        <a class="ctf-link" href="https://ctftime.org/event/${parseInt(e.id)||0}" target="_blank" rel="noopener noreferrer">[ VIEW EVENT → ]</a>
       </div>`;
     }).join('');
     termLog('ok',`Loaded ${events.length} upcoming CTF events`);
@@ -559,12 +579,12 @@ async function loadCVE() {
 
   grid.innerHTML = all.slice(0, 12).map(v => `
     <div class="cve-card ${v.severity}">
-      <div class="cve-source">[${v.source}]</div>
-      ${v.cveId ? `<div class="cve-id">${v.cveId}</div>` : ''}
+      <div class="cve-source">[${sanitize(v.source)}]</div>
+      ${v.cveId ? `<div class="cve-id">${sanitize(v.cveId)}</div>` : ''}
       <span class="cve-badge badge-${v.severity}">${v.severity.toUpperCase()}</span>
-      <div class="cve-title">${v.title}</div>
-      <div class="cve-desc">${v.desc}</div>
-      <a class="cve-link" href="${v.link}" target="_blank" rel="noopener">[ DETAILS &#8594; ]</a>
+      <div class="cve-title">${sanitize(v.title)}</div>
+      <div class="cve-desc">${sanitize(v.desc)}</div>
+      <a class="cve-link" href="${safeUrl(v.link)}" target="_blank" rel="noopener noreferrer">[ DETAILS &#8594; ]</a>
     </div>`).join('');
 
   const now = new Date().toLocaleTimeString('en-GB');
@@ -630,10 +650,10 @@ setInterval(()=>{
   "url": "https://morariuraulandrei-commits.github.io/OperatorZero/",
   "address": {
     "@type": "PostalAddress",
-    "streetAddress": "Str. Poetului Nr. 22",
+    "streetAddress": "Str. Poetului Nr. 24",
     "addressLocality": "Arad",
     "addressRegion": "Arad",
-    "postalCode": "310000",
+    "postalCode": "310158",
     "addressCountry": "RO"
   },
   "keywords": "cybersecurity, CVE, vulnerability, malware, threat intelligence, cyberattack"
