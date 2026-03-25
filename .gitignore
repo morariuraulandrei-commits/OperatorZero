@@ -1,0 +1,14 @@
+venv/
+env/
+.venv/
+.env
+data/
+*.db
+*.log
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.vscode/
+.idea/
+*.swp
