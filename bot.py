@@ -1,10 +1,14 @@
 """
-OperatorZero — Telegram Cybersecurity Intelligence Bot
+OperatorZero - Telegram Cybersecurity Intelligence Bot
 Posteaza automat 6 stiri de securitate cibernetica la fiecare 5 minute.
 """
 import asyncio
 import logging
+import os
 import sys
+
+# Asigura existenta directorului data/ (pentru log si baza de date)
+os.makedirs("data", exist_ok=True)
 
 from telegram import Update, Bot
 from telegram.ext import Application, CommandHandler, ContextTypes
@@ -30,7 +34,7 @@ channel_id: str = config.CHANNEL_ID
 
 
 def format_article(article: dict) -> str:
-    emoji  = article.get("emoji", "📰")
+    emoji  = article.get("emoji", "\U0001f4e1")
     source = article.get("source", "Unknown")
     title  = article.get("title", "No title")
     desc   = article.get("description", "")
@@ -41,10 +45,10 @@ def format_article(article: dict) -> str:
             text = text.replace(ch, f"\\{ch}")
         return text
 
-    lines = [f"{emoji} *{esc(source)}*", "", f"📌 *{esc(title)}*"]
+    lines = [f"{emoji} *{esc(source)}*", "", f"\U0001f4f0 *{esc(title)}*"]
     if desc:
         lines += ["", f"_{esc(desc[:200])}\\.\\.\\._ "]
-    lines += ["", f"🔗 [Citeste articolul]({url})"]
+    lines += ["", f"\U0001f517 [Citeste articolul]({url})"]
     return "\n".join(lines)
 
 
@@ -84,13 +88,13 @@ async def post_news(bot: Bot, chat_id: str = None):
 
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        f"🤖 *OperatorZero* — Cybersecurity Intelligence Bot\n\n"
-        f"📡 *Surse:* {len(scraper.RSS_FEEDS)}\n"
-        f"⏱ *Interval:* {config.FETCH_INTERVAL // 60} minute\n"
-        f"📦 *Stiri/ciclu:* {config.ITEMS_PER_BATCH}\n\n"
-        "📋 *Comenzi:*\n"
-        "/status — stare bot\n/setchannel @id — seteaza canal\n"
-        "/fetch — actualizeaza manual\n/stats — statistici",
+        f"\U0001f916 *OperatorZero* - Cybersecurity Intelligence Bot\n\n"
+        f"\U0001f4e1 *Surse:* {len(scraper.RSS_FEEDS)}\n"
+        f"\u23f0 *Interval:* {config.FETCH_INTERVAL // 60} minute\n"
+        f"\U0001f4f0 *Stiri/ciclu:* {config.ITEMS_PER_BATCH}\n\n"
+        "\U0001f4cb *Comenzi:*\n"
+        "/status - stare bot\n/setchannel @id - seteaza canal\n"
+        "/fetch - actualizeaza manual\n/stats - statistici",
         parse_mode=ParseMode.MARKDOWN
     )
 
@@ -98,10 +102,10 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def cmd_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
     stats = database.get_stats(config.DB_PATH)
     await update.message.reply_text(
-        f"✅ *Bot:* Online\n📍 *Canal:* `{channel_id or 'Nesetat'}`\n"
-        f"⏱ *Interval:* {config.FETCH_INTERVAL // 60} min\n"
-        f"📰 *Surse RSS:* {len(scraper.RSS_FEEDS)}\n"
-        f"📊 *Total postate:* {stats['total']}",
+        f"\u2705 *Bot:* Online\n\U0001f4e1 *Canal:* `{channel_id or 'Nesetat'}`\n"
+        f"\u23f0 *Interval:* {config.FETCH_INTERVAL // 60} min\n"
+        f"\U0001f4e1 *Surse RSS:* {len(scraper.RSS_FEEDS)}\n"
+        f"\U0001f4ca *Total postate:* {stats['total']}",
         parse_mode=ParseMode.MARKDOWN
     )
 
@@ -109,23 +113,23 @@ async def cmd_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def cmd_setchannel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global channel_id
     if not context.args:
-        await update.message.reply_text("❌ Utilizare: `/setchannel @canal`", parse_mode=ParseMode.MARKDOWN)
+        await update.message.reply_text("\u26a0\ufe0f Utilizare: `/setchannel @canal`", parse_mode=ParseMode.MARKDOWN)
         return
     channel_id = context.args[0]
-    await update.message.reply_text(f"✅ Canal setat: `{channel_id}`", parse_mode=ParseMode.MARKDOWN)
+    await update.message.reply_text(f"\u2705 Canal setat: `{channel_id}`", parse_mode=ParseMode.MARKDOWN)
 
 
 async def cmd_fetch(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("🔄 Actualizare în curs\\.\\.\\.", parse_mode=ParseMode.MARKDOWN_V2)
+    await update.message.reply_text("\U0001f504 Actualizare in curs\\.\\.\\.", parse_mode=ParseMode.MARKDOWN_V2)
     await post_news(context.bot)
-    await update.message.reply_text("✅ Gata\\!", parse_mode=ParseMode.MARKDOWN_V2)
+    await update.message.reply_text("\u2705 Gata\\!", parse_mode=ParseMode.MARKDOWN_V2)
 
 
 async def cmd_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     stats = database.get_stats(config.DB_PATH)
-    lines = [f"📊 *Statistici OperatorZero*\n\nTotal postate: *{stats['total']}*"]
+    lines = [f"\U0001f4ca *Statistici OperatorZero*\n\nTotal postate: *{stats['total']}*"]
     for src, cnt in stats.get("top_sources", []):
-        lines.append(f"  • {src}: {cnt}")
+        lines.append(f"  \u2022 {src}: {cnt}")
     await update.message.reply_text("\n".join(lines), parse_mode=ParseMode.MARKDOWN)
 
 
@@ -135,7 +139,7 @@ async def post_init(application: Application):
     scheduler.add_job(post_news, "interval", seconds=config.FETCH_INTERVAL,
                       args=[application.bot], id="news_job", replace_existing=True)
     scheduler.start()
-    logger.info("Scheduler pornit — interval %ds canal '%s'", config.FETCH_INTERVAL, config.CHANNEL_ID or "nesetat")
+    logger.info("Scheduler pornit - interval %ds canal '%s'", config.FETCH_INTERVAL, config.CHANNEL_ID or "nesetat")
 
 
 def main():
