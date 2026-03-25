@@ -3,6 +3,29 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<!-- SEO PRIMARY -->
+<meta name="description" content="OperatorZero &#8212; Real-time cybersecurity intelligence platform. Live CVE vulnerability alerts, malware news, global cyberattack map and CTF competitions. Arad, Romania.">
+<meta name="keywords" content="cybersecurity, cyber security, CVE, vulnerability, CVE alerts, malware, APT, ransomware, phishing, zero-day, threat intelligence, cyberattack map, hacking news, CTF, security news, CISA, NVD, OperatorZero, Arad Romania, securitate cibernetica">
+<meta name="author" content="OperatorZero">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+<link rel="canonical" href="https://morariuraulandrei-commits.github.io/OperatorZero/">
+<!-- OPEN GRAPH -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="OperatorZero &#8212; Cybersecurity Threat Intelligence">
+<meta property="og:description" content="Live CVE vulnerabilities, global cyberattack map, malware alerts and CTF competitions.">
+<meta property="og:url" content="https://morariuraulandrei-commits.github.io/OperatorZero/">
+<meta property="og:site_name" content="OperatorZero">
+<meta property="og:locale" content="en_US">
+<!-- TWITTER CARD -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="OperatorZero &#8212; Cybersecurity Threat Intelligence">
+<meta name="twitter:description" content="Live CVE vulnerabilities, global cyberattack map, malware alerts and CTF competitions.">
+<!-- SECURITY HEADERS via meta -->
+<meta http-equiv="X-XSS-Protection" content="1; mode=block">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+<meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()">
+<meta name="theme-color" content="#050508">
 <title>OperatorZero — Cyber Threat Intelligence</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
 <style>
@@ -147,6 +170,30 @@ footer span{color:var(--green)}
   .stats-bar{gap:30px}
   #globe-wrap{height:340px}
 }
+
+/* CVE ALERTS */
+#cve{background:linear-gradient(180deg,#060910 0%,#04060a 100%)}
+.cve-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px}
+.cve-card{background:var(--card);border:1px solid #1a0a0a;padding:18px;position:relative;overflow:hidden;transition:.3s}
+.cve-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%}
+.cve-card.critical::before{background:#ff0000}
+.cve-card.high::before{background:#ff6600}
+.cve-card.medium::before{background:#ffaa00}
+.cve-card.low::before{background:#88aaff}
+.cve-card:hover{transform:translateY(-2px)}
+.cve-badge{display:inline-block;padding:2px 10px;font-size:.6rem;letter-spacing:2px;font-weight:700;margin-bottom:8px}
+.badge-critical{background:rgba(255,0,0,.15);color:#ff0000;border:1px solid #ff0000}
+.badge-high{background:rgba(255,102,0,.12);color:#ff6600;border:1px solid #ff6600}
+.badge-medium{background:rgba(255,170,0,.12);color:#ffaa00;border:1px solid #ffaa00}
+.badge-low{background:rgba(136,170,255,.1);color:#88aaff;border:1px solid #88aaff}
+.cve-id{font-family:'Orbitron',sans-serif;font-size:.75rem;color:var(--red);letter-spacing:2px;margin-bottom:6px}
+.cve-title{font-size:.85rem;color:#ddcccc;line-height:1.5;margin-bottom:8px}
+.cve-desc{font-size:.7rem;color:#556655;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cve-link{display:inline-block;margin-top:10px;font-size:.65rem;color:var(--red);text-decoration:none;letter-spacing:1px}
+.cve-source{font-size:.62rem;color:#334433;letter-spacing:1px;margin-bottom:4px}
+.refresh-bar{display:flex;align-items:center;gap:12px;margin-bottom:20px;font-size:.7rem;color:#446644}
+.refresh-dot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:pulse 1.5s infinite}
+
 </style>
 </head>
 <body>
@@ -158,6 +205,7 @@ footer span{color:var(--green)}
   <ul>
     <li><a href="#hero">MAP</a></li>
     <li><a href="#threats">THREATS</a></li>
+    <li><a href="#cve">CVE</a></li>
     <li><a href="#ctf">CTF</a></li>
     <li><a href="#about">INTEL</a></li>
   </ul>
@@ -168,7 +216,7 @@ footer span{color:var(--green)}
 <section id="hero">
   <div class="hero-label">[ CYBER THREAT INTELLIGENCE PLATFORM ]</div>
   <h1>OPERATOR<span>ZERO</span></h1>
-  <p class="hero-desc">Real-time global cyberattack monitoring · Threat intelligence · CTF competitions</p>
+  <p class="hero-desc">Real-time global cyberattack monitoring &middot; Threat intelligence &middot; CVE alerts &middot; CTF competitions</p>
 
   <div id="globe-wrap">
     <div id="globeViz"></div>
@@ -196,6 +244,20 @@ footer span{color:var(--green)}
 
   <div class="news-grid" id="news-feed">
     <div class="loading">[ LOADING THREAT DATA... ]</div>
+  </div>
+</section>
+
+
+<!-- CVE VULNERABILITY ALERTS -->
+<section id="cve">
+  <div class="section-title">CVE VULNERABILITY ALERTS</div>
+  <div class="section-sub">// NVD &amp; CISA ADVISORIES &#183; CRITICAL VULNERABILITIES &#183; ACTUALIZARE LA 5 MIN</div>
+  <div class="refresh-bar">
+    <div class="refresh-dot"></div>
+    <span id="cve-status">LOADING CVE FEEDS...</span>
+  </div>
+  <div class="cve-grid" id="cve-grid">
+    <div class="loading">[ SCANNING VULNERABILITY DATABASES... ]</div>
   </div>
 </section>
 
@@ -441,6 +503,78 @@ async function loadCTF(){
 }
 loadCTF();
 
+// ═══ CVE / VULNERABILITY FEED ═══
+const CVE_FEEDS = [
+  {name:'NVD Recent',url:'https://nvd.nist.gov/feeds/xml/cve/misc/nvd-rss.xml',badge:'NVD'},
+  {name:'CISA Advisories',url:'https://www.cisa.gov/cybersecurity-advisories/all.xml',badge:'CISA'},
+  {name:'Exploit DB',url:'https://www.exploit-db.com/rss.xml',badge:'EXPLOIT-DB'},
+  {name:'The Hacker News',url:'https://feeds.feedburner.com/TheHackersNews',badge:'THN'},
+];
+
+function getSeverity(title, desc) {
+  const text = (title + ' ' + desc).toLowerCase();
+  if (text.includes('critical') || text.includes('rce') || text.includes('remote code')) return 'critical';
+  if (text.includes('high') || text.includes('privilege') || text.includes('escalation')) return 'high';
+  if (text.includes('medium') || text.includes('moderate') || text.includes('xss')) return 'medium';
+  return 'low';
+}
+
+function extractCVEId(text) {
+  const m = text.match(/CVE-\d{4}-\d{4,7}/i);
+  return m ? m[0].toUpperCase() : null;
+}
+
+async function loadCVE() {
+  const all = [];
+  for (let i = 0; i < CVE_FEEDS.length; i++) {
+    const f = CVE_FEEDS[i];
+    try {
+      const r = await fetch(RSS2JSON + encodeURIComponent(f.url));
+      const d = await r.json();
+      if (d.status !== 'ok') continue;
+      d.items.slice(0, 5).forEach(item => {
+        const title = item.title || '';
+        const link = item.link || '#';
+        const desc = (item.description || '').replace(/<[^>]+>/g, '').trim().slice(0, 160);
+        const severity = getSeverity(title, desc);
+        const cveId = extractCVEId(title + desc);
+        if (title) all.push({title, link, desc, severity, cveId, source: f.badge});
+      });
+    } catch(e) {}
+    await new Promise(r => setTimeout(r, 200));
+  }
+
+  const grid = document.getElementById('cve-grid');
+  const status = document.getElementById('cve-status');
+
+  if (!all.length) {
+    grid.innerHTML = '<div class="loading">[ CVE FEED TEMPORARILY UNAVAILABLE ]</div>';
+    if (status) status.textContent = 'CVE FEED UNAVAILABLE — RETRYING IN 5 MIN';
+    return;
+  }
+
+  // Sort: critical first
+  const order = {critical:0, high:1, medium:2, low:3};
+  all.sort((a,b) => order[a.severity] - order[b.severity]);
+
+  grid.innerHTML = all.slice(0, 12).map(v => `
+    <div class="cve-card ${v.severity}">
+      <div class="cve-source">[${v.source}]</div>
+      ${v.cveId ? `<div class="cve-id">${v.cveId}</div>` : ''}
+      <span class="cve-badge badge-${v.severity}">${v.severity.toUpperCase()}</span>
+      <div class="cve-title">${v.title}</div>
+      <div class="cve-desc">${v.desc}</div>
+      <a class="cve-link" href="${v.link}" target="_blank" rel="noopener">[ DETAILS &#8594; ]</a>
+    </div>`).join('');
+
+  const now = new Date().toLocaleTimeString('en-GB');
+  if (status) status.textContent = `LIVE &#183; ${all.length} VULNERABILITIES LOADED &#183; UPDATED ${now}`;
+  termLog('warn', `CVE scan: ${all.filter(v=>v.severity==='critical').length} CRITICAL, ${all.filter(v=>v.severity==='high').length} HIGH severity`);
+}
+loadCVE();
+setInterval(loadCVE, 300000);
+
+
 // ─── TERMINAL LOG ───
 const term=document.getElementById('terminal');
 const logs=[
@@ -484,6 +618,41 @@ setInterval(()=>{
   const m=msgs[Math.floor(Math.random()*msgs.length)];
   termLog(m[0],m[1]);
 },8000);
+</script>
+
+<!-- STRUCTURED DATA FOR SEO -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "OperatorZero",
+  "description": "Real-time cybersecurity intelligence platform providing live CVE alerts, malware tracking, cyberattack visualization and CTF competitions.",
+  "url": "https://morariuraulandrei-commits.github.io/OperatorZero/",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Str. Poetului Nr. 22",
+    "addressLocality": "Arad",
+    "addressRegion": "Arad",
+    "postalCode": "310000",
+    "addressCountry": "RO"
+  },
+  "keywords": "cybersecurity, CVE, vulnerability, malware, threat intelligence, cyberattack"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "OperatorZero",
+  "url": "https://morariuraulandrei-commits.github.io/OperatorZero/",
+  "description": "Cybersecurity threat intelligence: live CVE alerts, attack map, malware news, CTF competitions.",
+  "inLanguage": "en",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://morariuraulandrei-commits.github.io/OperatorZero/?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
 </script>
 </body>
 </html>
