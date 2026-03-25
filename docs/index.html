@@ -364,7 +364,7 @@ threats.forEach(t=>{
 });
 
 // ─── NEWS FEED ───
-const CORS='https://api.allorigins.win/get?url=';
+const RSS2JSON='https://api.rss2json.com/v1/api.json?rss_url=';
 const FEEDS=[
   {name:'The Hacker News',url:'https://feeds.feedburner.com/TheHackersNews',tag:'APT',tagClass:'apt'},
   {name:'Bleeping Computer',url:'https://www.bleepingcomputer.com/feed/',tag:'MALWARE',tagClass:'malware'},
@@ -376,21 +376,18 @@ const FEEDS=[
 const CARD_COLORS=['','red','blue','','red','blue'];
 
 async function loadNews(){
-  const feed=FEEDS[Math.floor(Math.random()*FEEDS.length)];
   const all=[];
   for(let i=0;i<Math.min(3,FEEDS.length);i++){
     const f=FEEDS[i];
     try{
-      const r=await fetch(CORS+encodeURIComponent(f.url));
+      const r=await fetch(RSS2JSON+encodeURIComponent(f.url));
       const d=await r.json();
-      const parser=new DOMParser();
-      const xml=parser.parseFromString(d.contents,'text/xml');
-      const items=[...xml.querySelectorAll('item')].slice(0,4);
-      items.forEach((item,idx)=>{
-        const title=item.querySelector('title')?.textContent||'';
-        const link=item.querySelector('link')?.textContent||item.querySelector('link')?.getAttribute('href')||'#';
-        const desc=(item.querySelector('description')?.textContent||'').replace(/<[^>]+>/g,'').trim().slice(0,120);
-        const pub=item.querySelector('pubDate')?.textContent||'';
+      if(d.status!=='ok') continue;
+      d.items.slice(0,4).forEach(item=>{
+        const title=item.title||'';
+        const link=item.link||'#';
+        const desc=(item.description||'').replace(/<[^>]+>/g,'').trim().slice(0,120);
+        const pub=item.pubDate||'';
         if(title) all.push({title,link,desc,pub,source:f.name,tag:f.tag,tagClass:f.tagClass,color:CARD_COLORS[i]});
       });
     }catch(e){}
@@ -418,9 +415,9 @@ async function loadCTF(){
   const now=Math.floor(Date.now()/1000);
   const url=`https://ctftime.org/api/v1/events/?limit=12&start=${now}`;
   try{
-    const r=await fetch(CORS+encodeURIComponent(url));
+    const r=await fetch(url,{headers:{'Accept':'application/json'}});
     const d=await r.json();
-    const events=JSON.parse(d.contents);
+    const events=await r.json();
     const grid=document.getElementById('ctf-grid');
     if(!events||!events.length){grid.innerHTML='<div class="loading">[ NO CTF EVENTS AVAILABLE ]</div>';return;}
     grid.innerHTML=events.map(e=>{
